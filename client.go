@@ -70,7 +70,7 @@ func WithTimeout(d time.Duration) Option {
 	return func(c *Client) {
 		if d > 0 {
 			c.Conf.Timeout = d
-			c.conn.Transport = newTransport(c.Conf)
+			c.conn.Timeout = d
 		}
 	}
 }
