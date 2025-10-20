@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+
+# Editors / IDE
+.vscode/
+.idea/
+
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Build output
+bin/
+dist/
+out/
+
+# Coverage
+*.out
+coverage/
+
+# Caches
+.cache/
+
+
