@@ -1,7 +1,6 @@
 package easyhttp
 
 import (
-	"context"
 	"net"
 	"net/http"
 	"time"
@@ -17,18 +16,16 @@ type Config struct {
 }
 
 func newTransport(cfg Config) *http.Transport {
+	d := &net.Dialer{
+		Timeout:   cfg.ConnTimeout,
+		KeepAlive: 30 * time.Second,
+	}
 	return &http.Transport{
-		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// Connection timeout setup
-			c, err := net.DialTimeout(network, addr, cfg.ConnTimeout)
-			if err != nil {
-				return nil, err
-			}
-			return c, nil
-		},
+		DialContext:           d.DialContext,
 		TLSHandshakeTimeout:   cfg.ConnTimeout,     // TLS handshake timeout
 		ResponseHeaderTimeout: cfg.ResponseTimeout, // Response header timeout
-		ForceAttemptHTTP2:     !cfg.DisableHttp2,   // Enable HTTP/2
+		ExpectContinueTimeout: 1 * time.Second,     // Reasonable default
+		ForceAttemptHTTP2:     !cfg.DisableHttp2,   // Enable HTTP/2 unless disabled
 		MaxIdleConns:          0,                   // Max keep-alive connections, unlimited
 		MaxIdleConnsPerHost:   cfg.MaxConns,        // Keep-alive connections per host
 		MaxConnsPerHost:       cfg.MaxConns,        // Max total connections per host

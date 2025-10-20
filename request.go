@@ -2,6 +2,7 @@ package easyhttp
 
 import (
 	"bytes"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -25,7 +26,7 @@ type Request struct {
 	urls   *url.URL
 	header http.Header
 	query  url.Values
-	body   *bytes.Buffer
+	body   io.Reader
 }
 
 func NewRequest(method, baseUrl string) (*Request, error) {
@@ -56,6 +57,26 @@ func NewPut(baseUrl string) (*Request, error) {
 
 func NewDelete(baseUrl string) (*Request, error) {
 	return NewRequest(MethodDelete, baseUrl)
+}
+
+func NewPatch(baseUrl string) (*Request, error) {
+	return NewRequest(MethodPatch, baseUrl)
+}
+
+func NewHead(baseUrl string) (*Request, error) {
+	return NewRequest(MethodHead, baseUrl)
+}
+
+func NewOptions(baseUrl string) (*Request, error) {
+	return NewRequest(MethodOptions, baseUrl)
+}
+
+func NewConnect(baseUrl string) (*Request, error) {
+	return NewRequest(MethodConnect, baseUrl)
+}
+
+func NewTrace(baseUrl string) (*Request, error) {
+	return NewRequest(MethodTrace, baseUrl)
 }
 
 func (r *Request) AddHeader(key, value string) *Request {
@@ -94,7 +115,7 @@ func (r *Request) SetPath(path string) *Request {
 }
 
 func (r *Request) SetBody(body []byte) *Request {
-	r.body = bytes.NewBuffer(body)
+	r.body = bytes.NewReader(body)
 	return r
 }
 
@@ -103,9 +124,15 @@ func (r *Request) SetJSON(body any) (*Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.body = bytes.NewBuffer(data)
+	r.body = bytes.NewReader(data)
 	r.header.Set("Content-Type", "application/json")
 	return r, nil
+}
+
+// SetBodyReader allows streaming request body without buffering into memory
+func (r *Request) SetBodyReader(reader io.Reader) *Request {
+	r.body = reader
+	return r
 }
 
 func (r *Request) GetBaseUrl() string {
@@ -136,6 +163,6 @@ func (r *Request) GetHeader() http.Header {
 	return r.header
 }
 
-func (r *Request) GetBody() *bytes.Buffer {
+func (r *Request) GetBody() io.Reader {
 	return r.body
 }
